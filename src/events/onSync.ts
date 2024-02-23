@@ -1,4 +1,4 @@
-import * as alt from 'alt-server';
+import * as alt from '@altv/server';
 
 const callbacks: Array<(entity: alt.Entity) => void> = [];
 

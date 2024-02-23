@@ -1,4 +1,4 @@
-import * as alt from 'alt-server';
+import * as alt from '@altv/server';
 import { MongoClient, Db, InsertOneResult, ObjectId } from 'mongodb';
 import * as Utility from '../utility/deepCopy.js';
 
@@ -25,8 +25,8 @@ async function setup() {
         return;
     }
 
-    const connectionString = <string>alt.getMeta(MetaNames.mongodbConnectionString);
-    const databaseName = <string>alt.getMeta(MetaNames.databaseName);
+    const connectionString = <string>alt.meta[MetaNames.mongodbConnectionString];
+    const databaseName = <string>alt.meta[MetaNames.databaseName];
 
     if (!connectionString) {
         await alt.Utils.wait(1000);
@@ -79,12 +79,12 @@ export async function connect(mongodbConnectionString: string, databaseName: str
         return;
     }
 
-    if (alt.hasMeta(MetaNames.mongodbConnectionString) || alt.hasMeta(MetaNames.databaseName)) {
+    if (alt.meta[MetaNames.mongodbConnectionString] !== undefined || alt.meta[MetaNames.databaseName] !== undefined) {
         return;
     }
 
-    alt.setMeta(MetaNames.mongodbConnectionString, mongodbConnectionString);
-    alt.setMeta(MetaNames.databaseName, databaseName);
+    alt.meta[MetaNames.mongodbConnectionString] = mongodbConnectionString;
+    alt.meta[MetaNames.databaseName] = databaseName;
     setup();
 }
 

@@ -1,4 +1,4 @@
-import * as alt from 'alt-server';
+import * as alt from '@altv/server';
 
 const MetaChangeKeyEvent = 'crc-meta-change';
 const keyChangeCallbacks: { [key: string]: Array<(entity: alt.Entity, newValue: any, oldValue: any) => void> } = {};
@@ -7,7 +7,7 @@ let registeredEvents = false;
 
 function registerEventHandler() {
     registeredEvents = true;
-    alt.on(MetaChangeKeyEvent, (key: string, entity: alt.Entity, newValue: any, oldValue: any) => {
+    alt.Events.on(MetaChangeKeyEvent, (key: string, entity: alt.Entity, newValue: any, oldValue: any) => {
         if (!keyChangeCallbacks[key]) {
             return;
         }
@@ -43,5 +43,5 @@ export function onKeyChange(key: string, callback: (entity: alt.Entity, newValue
 }
 
 export function invokeDataChange(key: string, entity: alt.Entity, newValue: any, oldValue: any) {
-    alt.emit(MetaChangeKeyEvent, key, entity, newValue, oldValue);
+    alt.Events.emit(MetaChangeKeyEvent, key, entity, newValue, oldValue);
 }

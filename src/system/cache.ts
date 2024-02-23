@@ -1,4 +1,4 @@
-import * as alt from 'alt-server';
+import * as alt from '@altv/server';
 
 const keyPrefix = 'orchestra-';
 
@@ -12,7 +12,7 @@ const keyPrefix = 'orchestra-';
  * @param {Value} value
  */
 export function set<T extends string, Value>(key: T, value: Value) {
-    alt.setMeta(keyPrefix + String(key), value);
+    alt.meta[keyPrefix + String(key)] = value;
 }
 
 /**
@@ -25,7 +25,9 @@ export function set<T extends string, Value>(key: T, value: Value) {
  * @return {ReturnType}
  */
 export function get<T extends string, ReturnType = any>(key: T): ReturnType {
-    return alt.hasMeta(keyPrefix + String(key)) ? <ReturnType>alt.getMeta(keyPrefix + String(key)) : <ReturnType>{};
+    return alt.meta[keyPrefix + String(key)] !== undefined
+        ? <ReturnType>alt.meta[keyPrefix + String(key)]
+        : <ReturnType>{};
 }
 
 /**
@@ -36,5 +38,5 @@ export function get<T extends string, ReturnType = any>(key: T): ReturnType {
  * @param {T} key
  */
 export function remove<T extends string>(key: T) {
-    alt.deleteMeta(keyPrefix + key);
+    alt.meta[keyPrefix + key] = undefined;
 }

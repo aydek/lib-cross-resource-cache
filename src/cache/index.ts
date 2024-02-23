@@ -1,4 +1,4 @@
-import * as alt from 'alt-server';
+import * as alt from '@altv/server';
 import * as Database from '../database/index.js';
 import * as Utility from '../utility/index.js';
 import { invokeDataChange } from '../events/keyChange.js';
@@ -22,12 +22,12 @@ async function writeToDatabase(entity: alt.Entity, data: { [key: string]: any })
         return false;
     }
 
-    if (!entity.hasMeta('_id') || !entity.hasMeta('collection')) {
+    if (!entity.meta['_id'] !== undefined || !entity.meta['collection'] !== undefined) {
         return false;
     }
 
-    const _id = <string>entity.getMeta('_id');
-    const collection = <string>entity.getMeta('collection');
+    const _id = <string>entity.meta['_id'];
+    const collection = <string>entity.meta['collection'];
 
     const db = await Database.getMongoClient();
 
@@ -56,19 +56,19 @@ function processMeta(entity: alt.Entity, key: string, value: any) {
         return;
     }
 
-    const oldValue = entity.getMeta(key);
-    entity.setMeta(key, value);
+    const oldValue = entity.meta[key];
+    entity.meta[key] = value;
 
-    if (alt.getMeta(`${streamSyncedPrefix}${key}`)) {
-        entity.setStreamSyncedMeta(key, value);
+    if (alt.meta[`${streamSyncedPrefix}${key}`] !== undefined) {
+        entity.streamSyncedMeta[key] = value;
     }
 
-    if (alt.getMeta(`${syncedPrefix}${key}`)) {
-        entity.setSyncedMeta(key, value);
+    if (alt.meta[`${syncedPrefix}${key}`] !== undefined) {
+        entity.syncedMeta[key] = value;
     }
 
-    if (entity instanceof alt.Player && alt.getMeta(`${localPrefix}${key}`)) {
-        entity.setLocalMeta(key, value);
+    if (entity instanceof alt.Player && alt.meta[`${localPrefix}${key}`] !== undefined) {
+        entity.localMeta[key] = value;
     }
 
     invokeDataChange(key, entity, value, oldValue);
@@ -164,10 +164,10 @@ export function getValue<T = unknown>(entity: alt.Entity, key: string): T | unde
     }
 
     if (key === '_id') {
-        return String(entity.getMeta(String(key))) as T;
+        return String(entity.meta[String(key)]) as T;
     }
 
-    return entity.getMeta(String(key)) as T;
+    return entity.meta[String(key)] as T;
 }
 
 /**
@@ -197,15 +197,15 @@ export function getValues<T = unknown>(entity: alt.Entity): T {
         return undefined;
     }
 
-    const keys = entity.getMetaDataKeys();
+    const keys = Object.keys(entity.meta);
     const dataSet = {};
     for (let key of keys) {
-        if (key === '_id' && entity.hasMeta('_id')) {
-            dataSet[key] = String(entity.getMeta(key));
+        if (key === '_id' && entity.meta['_id'] !== undefined) {
+            dataSet[key] = String(entity.meta[key]);
             continue;
         }
 
-        dataSet[key] = entity.getMeta(key);
+        dataSet[key] = entity.meta[key];
     }
 
     return dataSet as T;
@@ -243,7 +243,7 @@ export async function sync(entity: alt.Entity, _id: string, collection: string) 
 
     try {
         dataSet = await db.collection(collection).findOne({ _id: new ObjectId(_id) });
-        entity.setMeta('collection', collection);
+        entity.meta['collection'] = collection;
     } catch (err) {
         console.error(`Could not find document for ${_id} in collection ${collection}`);
         return false;
@@ -314,7 +314,7 @@ export async function create<T extends { [key: string]: any }>(
  */
 export function setKeysAsStreamSynced(keys: Array<string>) {
     for (let key of keys) {
-        alt.setMeta(`${streamSyncedPrefix}${key}`, true);
+        alt.meta[`${streamSyncedPrefix}${key}`] = true;
     }
 }
 
@@ -334,7 +334,7 @@ export function setKeysAsStreamSynced(keys: Array<string>) {
  */
 export function setKeysAsSynced(keys: Array<string>) {
     for (let key of keys) {
-        alt.setMeta(`${syncedPrefix}${key}`, true);
+        alt.meta[`${syncedPrefix}${key}`] = true;
     }
 }
 
@@ -354,6 +354,6 @@ export function setKeysAsSynced(keys: Array<string>) {
  */
 export function setKeysAsLocal(keys: Array<string>) {
     for (let key of keys) {
-        alt.setMeta(`${localPrefix}${key}`, true);
+        alt.meta[`${localPrefix}${key}`] = true;
     }
 }
